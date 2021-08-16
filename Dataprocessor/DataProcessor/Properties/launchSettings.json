@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "DataProcessor": {
+      "commandName": "Project",
+      "commandLineArgs": "--file D:\\Vježbe\\C#\\WorkingwithFilesandStreamsinC#\\psdata\\in\\data1.txt"
+    }
+  }
+}
