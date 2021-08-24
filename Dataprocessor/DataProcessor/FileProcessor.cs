@@ -8,7 +8,7 @@ namespace DataProcessor
     {
         private const string BackupDirectoryName = "backup";
         private const string InProgressDirectoryName = "processing";
-        private const string CompleteDirectoryname = "complete";
+        private const string CompleteDirectoryName = "complete";
 
         public string InputFilePath { get; }
 
@@ -53,7 +53,52 @@ namespace DataProcessor
             Directory.CreateDirectory(Path.Combine(rootDirectoryPath, InProgressDirectoryName));
             string inProgressFilePath = Path.Combine(rootDirectoryPath, InProgressDirectoryName, inputFileName);
 
+            if(File.Exists(inProgressFilePath))
+            {
+                WriteLine($"ERROR: a file with the name {inProgressFilePath} is already being processed");
+                return;
+            }
+
             WriteLine($"Moving {InputFilePath} to {inProgressFilePath}");
+            File.Move(InputFilePath, inProgressFilePath);
+
+            // Determine type of file
+            string extension = Path.GetExtension(InputFilePath);
+
+            switch(extension)
+            {
+                case ".txt":
+                    ProcessTextFile(inProgressFilePath);
+                    break;
+                default:
+                    WriteLine($"{extension} is an unsupported file type.");
+                    break;
+            }
+
+            // Move file after processing is complete
+            string completedDirectoryPath = Path.Combine(rootDirectoryPath, CompleteDirectoryName);
+            Directory.CreateDirectory(completedDirectoryPath);
+            WriteLine($"Moving {inProgressFilePath} to {completedDirectoryPath}");
+            //File.Move(inProgressFilePath, Path.Combine(completedDirectoryPath, inputFileName));
+
+            string completeFileName = $"{Path.GetFileNameWithoutExtension(InputFilePath)}-{Guid.NewGuid()}{extension}";
+
+            // If you got a file path and you just want to change the extension of the file name, you can call the Path.ChangeExtension method
+            //completeFileName = Path.ChangeExtension(completeFileName, ".complete");
+
+            var completedFilePath = Path.Combine(completedDirectoryPath, completeFileName);
+
+            File.Move(inProgressFilePath, completedFilePath);
+
+            // Delete the inProgressDirectory once the processing of the file is complete.
+            string inProgressDirectoryPath = Path.GetDirectoryName(inProgressFilePath);
+            Directory.Delete(inProgressDirectoryPath, true);
+        }
+
+        private void ProcessTextFile(string inProgressFilePath)
+        {
+            WriteLine($"Process text file {inProgressFilePath}");
+            // Read in and process
         }
     }
 }

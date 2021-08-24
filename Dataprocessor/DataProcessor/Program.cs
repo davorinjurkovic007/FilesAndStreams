@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using static System.Console;
 
 namespace DataProcessor
@@ -36,7 +37,22 @@ namespace DataProcessor
 
         private static void ProcessDirectory(string directoryPath, string fileType)
         {
-            
+            // string[] allFiles = Directory.GetFiles(directoryPath);
+
+            switch(fileType)
+            {
+                case "TEXT":
+                    string[] textFiles = Directory.GetFiles(directoryPath, "*.txt");
+                    foreach(var textFilePath in textFiles)
+                    {
+                        var fileProcessor = new FileProcessor(textFilePath);
+                        fileProcessor.Process();
+                    }
+                    break;
+                default:
+                    WriteLine($"ERROR: {fileType} is not supported");
+                    return;
+            }
         }
 
         private static void ProcessSingleFile(string filePath)
