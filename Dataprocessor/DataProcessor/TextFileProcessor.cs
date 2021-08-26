@@ -1,19 +1,23 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.IO.Abstractions;
 
 namespace DataProcessor
 {
     public class TextFileProcessor
     {
-        public TextFileProcessor(string inputFilePath, string outputFilePath)
+        private readonly IFileSystem fileSystem;
+
+        public TextFileProcessor(string inputFilePath, string outputFilePath, IFileSystem fileSystem)
         {
             InputFilePath = inputFilePath;
             OutputFilePath = outputFilePath;
+            this.fileSystem = fileSystem;
         }
+
+        public TextFileProcessor(string inputFilePath, string outputFilePath)
+            : this(inputFilePath, outputFilePath, new FileSystem()) { }
+
 
         public string InputFilePath { get; }
         public string OutputFilePath { get; }
@@ -43,11 +47,13 @@ namespace DataProcessor
 
             //using var inputFileStream = new FileStream(InputFilePath, FileMode.Open);
             //using var inputStreamReader = new StreamReader(inputFileStream);
-            using StreamReader inputStreamReader = File.OpenText(InputFilePath);
+            //using StreamReader inputStreamReader = File.OpenText(InputFilePath);
+            using StreamReader inputStreamReader = fileSystem.File.OpenText(InputFilePath);
 
             //using var outputFileStream = new FileStream(OutputFilePath, FileMode.CreateNew);
             //using var outputStreamWriter = new StreamWriter(outputFileStream);
-            using var outputStreamWriter = new StreamWriter(OutputFilePath);
+            //using var outputStreamWriter = new StreamWriter(OutputFilePath);
+            using var outputStreamWriter = fileSystem.File.CreateText(OutputFilePath);
 
             var currentLineNumber = 1;
             while(!inputStreamReader.EndOfStream)

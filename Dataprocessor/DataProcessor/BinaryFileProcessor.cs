@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Abstractions;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -9,10 +10,18 @@ namespace DataProcessor
 {
     public class BinaryFileProcessor
     {
-        public BinaryFileProcessor(string inputFilePath, string outputFilePath)
+        private readonly IFileSystem fileSystem;
+
+        public BinaryFileProcessor(string inputFilePath, string outputFilePath, IFileSystem fileSystem)
         {
             InputFilePath = inputFilePath;
             OutputFilePath = outputFilePath;
+            this.fileSystem = fileSystem;
+        }
+
+        public BinaryFileProcessor(string inputFilePath, string outputFilePath) 
+            :this(inputFilePath, outputFilePath, new FileSystem())
+        {
         }
 
         public string InputFilePath { get; }
@@ -63,29 +72,33 @@ namespace DataProcessor
 
             ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-            using FileStream inputFileStream = File.Open(InputFilePath, FileMode.Open, FileAccess.Read);
+            //using FileStream inputFileStream = File.Open(InputFilePath, FileMode.Open, FileAccess.Read);
+            using Stream inputFileStream = fileSystem.File.Open(InputFilePath, FileMode.Open, FileAccess.Read);
             using BinaryReader binaryReader = new BinaryReader(inputFileStream); 
 
-            using FileStream outputFileStream = File.OpenWrite(OutputFilePath);
+            //using FileStream outputFileStream = File.OpenWrite(OutputFilePath);
+            using Stream outputFileStream = fileSystem.File.OpenWrite(OutputFilePath);
             using BinaryWriter binaryWriter = new BinaryWriter(outputFileStream);
 
-            //byte largest = 0;
-            int largest = 0;
+            byte largest = 0;
+            //int largest = 0;
 
             while (binaryReader.BaseStream.Position < binaryReader.BaseStream.Length)
             {
-                //byte currentByte = binaryReader.ReadByte();
-                int currentByte = binaryReader.ReadByte();
+                byte currentByte = binaryReader.ReadByte();
+                //int currentByte = binaryReader.ReadByte();
 
-                binaryWriter.Write(currentByte); // writing a .NET int here
+                //binaryWriter.Write(currentByte); // writing a .NET int here
+                binaryWriter.Write(currentByte);
 
-                if(currentByte > largest)
+                if (currentByte > largest)
                 {
                     largest = currentByte;
                 }
             }
 
-            binaryWriter.Write(largest); // writing a .NET int here
+            //binaryWriter.Write(largest); // writing a .NET int here
+            binaryWriter.Write(largest); 
         }
     }
 }

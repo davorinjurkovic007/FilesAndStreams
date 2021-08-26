@@ -4,18 +4,27 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.IO.Abstractions;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace DataProcessor
 {
-    class CsvFileProcessor
+    public class CsvFileProcessor
     {
-        public CsvFileProcessor(string inputFilePath, string outputFilePath)
+        private readonly IFileSystem fileSystem;
+
+        public CsvFileProcessor(string inputFilePath, string outputFilePath, IFileSystem fileSystem)
         {
             InputFilePath = inputFilePath;
             OutputFilePath = outputFilePath;
+            this.fileSystem = fileSystem;
+        }
+
+        public CsvFileProcessor(string inputFilePath, string outputFilePath) : this(inputFilePath, outputFilePath, new FileSystem())
+        {
+
         }
 
         public string InputFilePath { get; }
@@ -23,7 +32,7 @@ namespace DataProcessor
 
         public void Process()
         {
-            using StreamReader inputReader = File.OpenText(InputFilePath);
+            using StreamReader inputReader = fileSystem.File.OpenText(InputFilePath);
 
             var csvConfiguration = new CsvConfiguration(CultureInfo.InvariantCulture)
             {
@@ -63,7 +72,7 @@ namespace DataProcessor
             //}
 
             // Create output CSV file
-            using StreamWriter output = File.CreateText(OutputFilePath);
+            using StreamWriter output = fileSystem.File.CreateText(OutputFilePath);
             using var csvWriter = new CsvWriter(output, CultureInfo.InvariantCulture);
 
             //csvWriter.WriteRecords(records);
